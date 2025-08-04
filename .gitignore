@@ -1,54 +1,34 @@
-# Backup directories
-*backup*/
-*.backup*
-build.backup*/
-frontend-static/
-src_broken_backup/
-
-# Node.js
+# Dependencies
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Build outputs
-/frontend/build/
-/frontend/dist/
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
 venv/
-env/
 .venv/
+env/
 
-# IDE
-.vscode/
-.idea/
+# Builds
+build/
+dist/
+frontend/build/
+frontend/dist/
 
-# Logs
+# Logs and debug
 *.log
 logs/
 
-# OS
+# Python
+__pycache__/
+*.py[cod]
+
+# System
 .DS_Store
 Thumbs.db
 
-# Database
-*.db
-*.sqlite
-dump.rdb
-redis/
-
-# Environment
+# Env
 .env
 .env.*
+.env.example
 
-# Large files
-treenew.txt
-tree_structure.txt
-package-lock.json
-yarn.lock
+# Others
+*.db
+*.sqlite
+*.rdb
+*.lock
