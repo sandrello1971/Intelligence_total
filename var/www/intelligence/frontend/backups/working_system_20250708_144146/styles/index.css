@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import './design-system.css';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: #f9fafb;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Sidebar Professional */
+.sidebar-professional {
+  width: 280px;
+  height: 100vh;
+  background: linear-gradient(180deg, #1e40af 0%, #1d4ed8 100%);
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 4px 0 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.main-content-professional {
+  margin-left: 280px;
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+/* Loading States */
+.loading-spinner {
+  @apply animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600;
+}
+
+/* Professional Status Badges */
+.status-active {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800;
+}
+
+.status-inactive {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800;
+}
+
+.role-admin {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800;
+}
+
+.role-manager {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800;
+}
+
+.role-operator {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800;
+}

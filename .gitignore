@@ -1,34 +1,9 @@
-# Dependencies
 node_modules/
 venv/
 .venv/
-env/
-
-# Builds
-build/
-dist/
-frontend/build/
-frontend/dist/
-
-# Logs and debug
-*.log
+data/
 logs/
-
-# Python
-__pycache__/
-*.py[cod]
-
-# System
-.DS_Store
-Thumbs.db
-
-# Env
-.env
-.env.*
-.env.example
-
-# Others
-*.db
+*.log
 *.sqlite
-*.rdb
-*.lock
+.env
+__pycache__/
