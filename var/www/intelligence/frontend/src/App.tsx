@@ -21,7 +21,7 @@ import WebScraping from './components/webscraping/WebScraping';
 import Assessment from './components/assessment/Assessment';
 import TaskManagement from './components/tasks/TaskManagement';
 import EmailCenter from './components/email/EmailCenter';
-import Articles from './components/articles/Articles';
+import ArticlesManagement from './pages/articles-management/ArticlesManagement';
 import TipologieServizi from './components/tipologie-servizi/TipologieServizi';
 import Partner from './components/partner/Partner';
 import KitCommerciali from './components/kit-commerciali/KitCommerciali';
@@ -56,7 +56,7 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="users" element={<UserManagementComplete />} />
             <Route path="aziende" element={<Companies />} />
-            <Route path="articoli" element={<Articles />} />
+            <Route path="articoli" element={<ArticlesManagement />} />
             <Route path="kit-commerciali" element={<KitCommerciali />} />
             <Route path="ticket-commerciali" element={<CommercialTickets />} />
             <Route path="tipologie-servizi" element={<TipologieServizi />} />

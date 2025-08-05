@@ -1,3 +1,4 @@
+import './ArticleCreationWizard.css';
 import React from 'react';
 import { useAppDispatch, useAppSelector } from '../../store';
 import {
@@ -11,7 +12,6 @@ import TypeSelection from './components/TypeSelection';
 import ArticleConfiguration from './components/ArticleConfiguration';
 import KitComposition from './components/KitComposition';
 import CreationReview from './components/CreationReview';
-import './ArticleCreationWizard.css';
 
 interface ArticleCreationWizardProps {
   onComplete: () => void;
