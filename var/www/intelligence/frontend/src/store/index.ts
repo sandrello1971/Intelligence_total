@@ -1,19 +1,19 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
-import authSlice from './authSlice';
-import articlesSlice from './articlesSlice';
+import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
+import articlesReducer from './articlesSlice';
+
+// Mock reducer per auth se non esiste
+const authSlice = {
+  name: 'auth',
+  initialState: { user: null, token: null, isAuthenticated: false },
+  reducers: {}
+};
 
 export const store = configureStore({
   reducer: {
-    auth: authSlice,
-    articles: articlesSlice,
+    articles: articlesReducer,
+    auth: (state = authSlice.initialState) => state,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: {
-        ignoredActions: ['persist/PERSIST'],
-      },
-    }),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
