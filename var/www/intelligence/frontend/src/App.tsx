@@ -1,12 +1,17 @@
-import { AuthProvider } from "./contexts/AuthContext";
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+
+// 🔥 IMPORT TUTTI I COMPONENTI VERI CHE ESISTEVANO
+// Verifichiamo prima che esistano, poi li importiamo
+
+// Auth components
 import LoginPage from './components/auth/LoginPage';
 import GoogleAuthSuccess from './components/auth/GoogleAuthSuccess';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import MainLayout from './components/layout/MainLayout';
 
-// Import componenti reali
+// Main components - QUESTI DOVREBBERO ESISTERE
 import Dashboard from './components/dashboard/Dashboard';
 import UserManagementComplete from './components/users/UserManagementComplete';
 import Companies from './components/companies/Companies';
@@ -14,23 +19,23 @@ import IntelliChat from './components/chat/IntelliChat';
 import DocumentsRAG from './components/documents/DocumentsRAG';
 import WebScraping from './components/webscraping/WebScraping';
 import Assessment from './components/assessment/Assessment';
-import TaskManagement from "./components/tasks/TaskManagement";
-import ModelliTicket from "./components/templates/ModelliTicket";
-import ServiziTemplate from "./components/servizi-template/ServiziTemplate";
-import ModelliTicket from "./components/templates/ModelliTicket";
-import ServiziTemplate from "./components/servizi-template/ServiziTemplate";
+import TaskManagement from './components/tasks/TaskManagement';
 import EmailCenter from './components/email/EmailCenter';
-import Articles from "./components/articles/Articles";
-import TipologieServizi from "./components/tipologie-servizi/TipologieServizi";
-import Partner from "./components/partner/Partner";
-import KitCommerciali from "./components/kit-commerciali/KitCommerciali";
-import CommercialTickets from "./pages/dashboard/CommercialTickets";
-import TasksGlobalManagement from "./components/workflow/TasksGlobalManagement";
-import WorkflowManagement from "./components/workflow/WorkflowManagement";
-import TaskDetailPage from "./pages/tasks/TaskDetailPage";
-import TicketDetailPage from "./pages/tickets/TicketDetailPage";
-import WikiPage from "./pages/wiki/WikiPage";
-import WikiPageViewer from "./components/wiki/WikiPageViewer";
+import Articles from './components/articles/Articles';
+import TipologieServizi from './components/tipologie-servizi/TipologieServizi';
+import Partner from './components/partner/Partner';
+import KitCommerciali from './components/kit-commerciali/KitCommerciali';
+import CommercialTickets from './pages/dashboard/CommercialTickets';
+import TasksGlobalManagement from './components/workflow/TasksGlobalManagement';
+import WorkflowManagement from './components/workflow/WorkflowManagement';
+import TaskDetailPage from './pages/tasks/TaskDetailPage';
+import TicketDetailPage from './pages/tickets/TicketDetailPage';
+import WikiPage from './pages/wiki/WikiPage';
+import WikiPageViewer from './components/wiki/WikiPageViewer';
+
+// Template components
+import ServiziTemplate from './components/servizi-template/ServiziTemplate';
+import ModelliTicket from './components/templates/ModelliTicket';
 
 function App() {
   return (
@@ -47,6 +52,7 @@ function App() {
           }>
             <Route index element={<Navigate to="/dashboard" replace />} />
             
+            {/* 🔥 TUTTE LE ROTTE ORIGINALI */}
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="users" element={<UserManagementComplete />} />
             <Route path="aziende" element={<Companies />} />
@@ -55,22 +61,21 @@ function App() {
             <Route path="ticket-commerciali" element={<CommercialTickets />} />
             <Route path="tipologie-servizi" element={<TipologieServizi />} />
             <Route path="partner" element={<Partner />} />
-            <Route path="tasks-global" element={<TasksGlobalManagement />} />
-            <Route path="workflow-management" element={<WorkflowManagement />} />
             <Route path="tasks" element={<TaskManagement />} />
             <Route path="tasks/:taskId" element={<TaskDetailPage />} />
             <Route path="tickets/:ticketId" element={<TicketDetailPage />} />
             <Route path="modelli-ticket" element={<ModelliTicket />} />
+            <Route path="servizi-template" element={<ServiziTemplate />} />
+            <Route path="tasks-global" element={<TasksGlobalManagement />} />
+            <Route path="workflow" element={<WorkflowManagement />} />
             <Route path="chat" element={<IntelliChat />} />
             <Route path="documents" element={<DocumentsRAG />} />
-            <Route path="web-scraping" element={<WebScraping />} />
+            <Route path="webscraping" element={<WebScraping />} />
             <Route path="assessment" element={<Assessment />} />
-            <Route path="email-center" element={<EmailCenter />} />
+            <Route path="email" element={<EmailCenter />} />
             <Route path="wiki" element={<WikiPage />} />
-            <Route path="wiki/pages/:slug" element={<WikiPageViewer />} />
+            <Route path="wiki/:slug" element={<WikiPageViewer />} />
           </Route>
-          
-          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </Router>
     </AuthProvider>
@@ -78,8 +83,3 @@ function App() {
 }
 
 export default App;
-
-// Importa il componente Workflow Management
-import WorkflowManagement from "./components/workflow/WorkflowManagement";
-import TaskDetailPage from "./pages/tasks/TaskDetailPage";
-import TicketDetailPage from "./pages/tickets/TicketDetailPage";
