@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, ForeignKey, Boolean, Text, UUID
 from sqlalchemy.orm import relationship
 from app.models.base import BaseModel
 
-class KitArticolo(BaseModel):
+class KitArticoloSchema(BaseModel):
     __tablename__ = "kit_articoli"
     __table_args__ = {'extend_existing': True}
 

@@ -15,7 +15,7 @@ class Articolo(BaseModel):
     tipo_prodotto = Column(String(20), nullable=False)
     partner_id = Column(Integer, ForeignKey("partner.id"), nullable=True)
     attivo = Column(Boolean, default=True)
-
+    partner = relationship("Partner", back_populates="articoli")
     # ✅ Campi mancanti
     prezzo_base = Column(Numeric(10, 2))
     durata_mesi = Column(Integer)

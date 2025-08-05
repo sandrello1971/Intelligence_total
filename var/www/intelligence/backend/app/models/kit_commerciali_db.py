@@ -1,3 +1,4 @@
+from sqlalchemy.dialects.postgresql import UUID
 """
 Intelligence AI Platform - Kit Commerciali Models
 Gestione kit commerciali e associazioni articoli
@@ -7,6 +8,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.database import Base
 
+
 class KitCommerciale(Base):
     __tablename__ = "kit_commerciali"
     
@@ -15,12 +17,12 @@ class KitCommerciale(Base):
     descrizione = Column(Text)
     articolo_principale_id = Column(Integer, ForeignKey("articoli.id"))
     attivo = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=func.now())  # Solo created_at come nel DB
-    
+    created_at = Column(DateTime, default=func.now())
+
     # Relationships
     articolo_principale = relationship("Articolo", backref="kit_principale")
-    kit_articoli = relationship("KitArticolo", back_populates="kit_commerciale", cascade="all, delete-orphan")
-    
+    kit_articoli = relationship("KitArticoloDB", back_populates="kit_commerciale", cascade="all, delete-orphan")
+
     def __repr__(self):
         return f"<KitCommerciale {self.nome}>"
 
@@ -37,22 +39,28 @@ class KitCommerciale(Base):
             'articoli_count': len(self.kit_articoli) if self.kit_articoli else 0
         }
 
-class KitArticolo(Base):
+
+class KitArticoloDB(Base):
     __tablename__ = "kit_articoli"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     kit_commerciale_id = Column(Integer, ForeignKey("kit_commerciali.id"), nullable=False)
     articolo_id = Column(Integer, ForeignKey("articoli.id"), nullable=False)
+    modello_ticket_id = Column(UUID(as_uuid=True), ForeignKey("modelli_ticket.id"), nullable=True)
+    partner_id = Column(Integer, ForeignKey("partner.id"), nullable=True)
     quantita = Column(Integer, default=1)
     obbligatorio = Column(Boolean, default=False)
     ordine = Column(Integer, default=0)
-    
+    note = Column(Text, nullable=True)
+
     # Relationships
     kit_commerciale = relationship("KitCommerciale", back_populates="kit_articoli")
     articolo = relationship("Articolo", backref="kit_articoli_rel")
-    
+    modello_ticket = relationship("ModelloTicket", lazy="joined")
+    partner = relationship("Partner", lazy="joined")
+
     def __repr__(self):
-        return f"<KitArticolo Kit:{self.kit_commerciale_id} Art:{self.articolo_id}>"
+        return f"<KitArticoloDB Kit:{self.kit_commerciale_id} Art:{self.articolo_id}>"
 
     def to_dict(self):
         return {
@@ -60,7 +68,12 @@ class KitArticolo(Base):
             'kit_commerciale_id': self.kit_commerciale_id,
             'articolo_id': self.articolo_id,
             'articolo': self.articolo.to_dict() if self.articolo else None,
+            'modello_ticket_id': str(self.modello_ticket_id) if self.modello_ticket_id else None,
+            'modello_ticket': self.modello_ticket.to_dict() if self.modello_ticket else None,
+            'partner_id': self.partner_id,
+            'partner': self.partner.to_dict() if self.partner else None,
             'quantita': self.quantita,
             'obbligatorio': self.obbligatorio,
-            'ordine': self.ordine
+            'ordine': self.ordine,
+            'note': self.note
         }

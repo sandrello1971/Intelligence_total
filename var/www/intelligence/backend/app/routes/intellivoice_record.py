@@ -12,7 +12,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.routes.auth import get_current_user_dep as get_current_user
-from app.models.kit_commerciali import KitCommerciale
+from app.models.kit_commerciali_db import KitCommerciale
 
 router = APIRouter(prefix="/api/v1/intellivoice", tags=["IntelliVoice 2.0"])
 

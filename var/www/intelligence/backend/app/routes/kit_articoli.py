@@ -2,11 +2,15 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.core.database import get_db
-from app.models.kit_commerciali import KitCommerciale
-from app.models.kit_articoli import KitArticolo
+from app.models.kit_commerciali_db import KitCommerciale
+from app.models.kit_articoli import KitArticoloSchema
 from app.models.articles import Articolo
 from app.models.partner import Partner
 from app.models.ticket_templates import ModelloTicket
+from app.models.kit_commerciali_db import KitArticoloDB
+from typing import Dict, Any
+from fastapi import APIRouter, Depends, HTTPException
+from app.routes.auth import get_current_user_from_jwt as get_current_user
 
 router = APIRouter(prefix="/kit-articoli", tags=["Kit Articoli"])
 
@@ -17,14 +21,14 @@ def get_kit_servizi_by_articolo(articolo_id: int, db: Session = Depends(get_db))
         
         if not kit:
             # Fallback: cerca se l'articolo è usato in kit_articoli
-            ka = db.query(KitArticolo).filter(KitArticolo.articolo_id == articolo_id).first()
+            ka = db.query(KitArticoloDB).filter(KitArticoloDB.articolo_id == articolo_id).first()
             if ka:
                 kit = db.query(KitCommerciale).filter(KitCommerciale.id == ka.kit_commerciale_id).first()
         
         if not kit:
             return {"success": True, "count": 0, "servizi": []}
         
-        servizi = db.query(KitArticolo).filter(KitArticolo.kit_commerciale_id == kit.id).order_by(KitArticolo.ordine).all()
+        servizi = db.query(KitArticoloDB).filter(KitArticoloDB.kit_commerciale_id == kit.id).order_by(KitArticoloDB.ordine).all()
 
         result = []
         for s in servizi:
@@ -49,3 +53,12 @@ def get_kit_servizi_by_articolo(articolo_id: int, db: Session = Depends(get_db))
         return {"success": True, "count": len(result), "servizi": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/kit-articoli/{id}", response_model=Dict[str, Any], dependencies=[Depends(get_current_user)])
+def delete_kit_articolo(id: int, db: Session = Depends(get_db)):
+    ka = db.query(KitArticoloDB).filter(KitArticoloDB.id == id).first()
+    if not ka:
+        raise HTTPException(status_code=404, detail="KitArticolo not found")
+    db.delete(ka)
+    db.commit()
+    return {"success": True, "message": f"KitArticolo {id} deleted"}

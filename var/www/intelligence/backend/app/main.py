@@ -13,43 +13,16 @@ from typing import Dict, Deque
 from datetime import datetime, timedelta
 # Import routes
 from app.routes import auth
-from app.routes import kit_articoli
-from app.routes import kit_articoli
-from app.routes import kit_articoli
 from app.api.v1 import ai_routes
 from app.routes import companies  # 🆕 Added companies import
-from app.routes import kit_articoli
-from app.routes import kit_articoli
-from app.routes import kit_articoli
 from app.routes import kit_commerciali
-from app.routes import kit_articoli
-from app.routes import kit_articoli
-from app.routes import kit_articoli
 from app.routes import tipologie_servizi
-from app.routes import kit_articoli
-from app.routes import kit_articoli
-from app.routes import kit_articoli
 from app.routes import partner
-from app.routes import kit_articoli
-from app.routes import kit_articoli
-from app.routes import kit_articoli
 from app.routes import articles
-from app.routes import kit_articoli
-from app.routes import kit_articoli
-from app.routes import kit_articoli
 from app.services.web_scraping import api_routes_working
 from app.routes import wiki
-from app.routes import kit_articoli
-from app.routes import kit_articoli
-from app.routes import kit_articoli
 from app.routes import rag_routes
-from app.routes import kit_articoli
-from app.routes import kit_articoli
-from app.routes import kit_articoli
 from app.routes import intellivoice_record
-from app.routes import kit_articoli
-from app.routes import kit_articoli
-from app.routes import kit_articoli
 
 # Database
 from app.database import create_tables
@@ -180,27 +153,13 @@ async def security_middleware(request: Request, call_next):
 
 # Include routers con prefix che match frontend
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["authentication"])
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
 app.include_router(ai_routes.router, prefix="/api/v1/ai", tags=["ai"])
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
 app.include_router(companies.router, tags=["companies"])  # 🆕 Added companies router
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
-from app.routes import kit_articoli
-from app.routes import kit_articoli
 app.include_router(articles.router, prefix="/api/v1", tags=["articles"])
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
-app.include_router(kit_articoli.router)
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
-app.include_router(kit_articoli.router, prefix="/api/v1")
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
 app.include_router(kit_commerciali.router, prefix="/api/v1", tags=["kit"])
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
 app.include_router(tipologie_servizi.router, prefix="/api/v1", tags=["tipologie"])
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
 app.include_router(partner.router, prefix="/api/v1", tags=["partner"])
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
 app.include_router(api_routes_working.router)
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
 
 # Root endpoint
 @app.get("/")
@@ -226,17 +185,9 @@ async def health():
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
 from app.routes import users_complete
-from app.routes import kit_articoli
-from app.routes import kit_articoli
-from app.routes import kit_articoli
 app.include_router(users_complete.router, prefix="/api/v1", tags=["users"])
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
 from app.routes import users_complete
-from app.routes import kit_articoli
-from app.routes import kit_articoli
-from app.routes import kit_articoli
 app.include_router(users_complete.router, prefix="/api/v1", tags=["users"])
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
 
 # Route temporanei per utenti
 @app.get("/api/v1/users/")
@@ -365,53 +316,29 @@ async def update_user_temp(user_id: str, request: dict):
     finally:
         db.close()
 from app.routes import tasks_global
-from app.routes import kit_articoli
-from app.routes import kit_articoli
-from app.routes import kit_articoli
 from app.routes import tasks
-from app.routes import kit_articoli
-from app.routes import kit_articoli
-from app.routes import kit_articoli
 from app.routes.auth_google import router as google_auth_router
 app.include_router(tasks_global.router, prefix="/api/v1")
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
 app.include_router(tasks.router, prefix="/api/v1")
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
 app.include_router(google_auth_router)
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
 
 # Workflow Configuration Routes
 from app.routes.admin import workflow_config, workflow_management
 
 app.include_router(workflow_config.router)
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
 app.include_router(workflow_management.router)
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
 
 
 from app.routes.admin import milestone_templates
 app.include_router(milestone_templates.router)
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
 app.include_router(wiki.router, prefix="/api/v1", tags=["wiki"])
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
 app.include_router(rag_routes.router, prefix="/api/v1", tags=["rag"])
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
 
 from app.routes import templates
-from app.routes import kit_articoli
-from app.routes import kit_articoli
-from app.routes import kit_articoli
 from app.routes import servizi_template
-from app.routes import kit_articoli
-from app.routes import kit_articoli
-from app.routes import kit_articoli
 from app.routes import tickets
-from app.routes import kit_articoli
-from app.routes import kit_articoli
-from app.routes import kit_articoli
-app.include_router(templates.router)
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
+app.include_router(templates.router, prefix="/api/v1/templates", tags=["ticket templates"])
 app.include_router(servizi_template.router)
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
 app.include_router(tickets.router, prefix="/api/v1", tags=["tickets"])
+from app.routes import kit_articoli
 app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
