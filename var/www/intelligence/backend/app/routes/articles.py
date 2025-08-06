@@ -198,3 +198,183 @@ async def get_users_disponibili(db: Session = Depends(get_db)):
 
     except Exception as e:
         return {"success": False, "error": str(e)}
+
+@router.get("/{article_id}")
+async def get_article(article_id: int, db: Session = Depends(get_db)):
+    """Ottieni singolo articolo per ID"""
+    try:
+        query = text("""
+        SELECT 
+            a.id, a.codice, a.nome, a.descrizione, a.tipo_prodotto, 
+            a.partner_id, a.prezzo_base, a.durata_mesi, a.attivo,
+            a.tipologia_servizio_id, a.responsabile_user_id,
+            a.modello_ticket_id, a.created_at, a.updated_at,
+            u.username as responsabile_username, u.email as responsabile_email,
+            CASE 
+                WHEN u.first_name IS NOT NULL AND u.last_name IS NOT NULL 
+                THEN u.first_name || ' ' || u.last_name
+                WHEN u.name IS NOT NULL AND u.surname IS NOT NULL 
+                THEN u.name || ' ' || u.surname
+                ELSE u.username
+            END as responsabile_display_name
+        FROM articoli a
+        LEFT JOIN users u ON a.responsabile_user_id = u.id
+        WHERE a.id = :article_id AND a.attivo = true
+        """)
+        
+        result = db.execute(query, {"article_id": article_id}).first()
+        
+        if not result:
+            raise HTTPException(status_code=404, detail="Articolo non trovato")
+        
+        article_data = {
+            "id": result.id,
+            "codice": result.codice,
+            "nome": result.nome,
+            "descrizione": result.descrizione,
+            "tipo_prodotto": result.tipo_prodotto,
+            "partner_id": result.partner_id,
+            "prezzo_base": float(result.prezzo_base) if result.prezzo_base else None,
+            "durata_mesi": result.durata_mesi,
+            "attivo": result.attivo,
+            "tipologia_servizio_id": result.tipologia_servizio_id,
+            "responsabile_user_id": str(result.responsabile_user_id) if result.responsabile_user_id else None,
+            "modello_ticket_id": str(result.modello_ticket_id) if result.modello_ticket_id else None,
+            "created_at": result.created_at.isoformat() if result.created_at else None,
+            "updated_at": result.updated_at.isoformat() if result.updated_at else None,
+            "responsabile_username": result.responsabile_username,
+            "responsabile_email": result.responsabile_email,
+            "responsabile_display_name": result.responsabile_display_name
+        }
+        
+        return {"success": True, "article": article_data}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Errore get_article: {e}")
+        raise HTTPException(status_code=500, detail=f"Errore recupero articolo: {str(e)}")
+
+@router.put("/{article_id}")
+async def update_article(article_id: int, article_data: dict, db: Session = Depends(get_db)):
+    """Aggiorna articolo"""
+    try:
+        # Verifica che l'articolo esista
+        check_query = text("SELECT id FROM articoli WHERE id = :article_id")
+        if not db.execute(check_query, {"article_id": article_id}).first():
+            raise HTTPException(status_code=404, detail="Articolo non trovato")
+        
+        # Prepara i campi per l'update
+        update_fields = []
+        params = {"article_id": article_id}
+        
+        if "codice" in article_data:
+            update_fields.append("codice = :codice")
+            params["codice"] = article_data["codice"]
+            
+        if "nome" in article_data:
+            update_fields.append("nome = :nome")
+            params["nome"] = article_data["nome"]
+            
+        if "descrizione" in article_data:
+            update_fields.append("descrizione = :descrizione")
+            params["descrizione"] = article_data["descrizione"]
+            
+        if "tipo_prodotto" in article_data:
+            update_fields.append("tipo_prodotto = :tipo_prodotto")
+            params["tipo_prodotto"] = article_data["tipo_prodotto"]
+            
+        if "tipologia_servizio_id" in article_data:
+            if article_data["tipologia_servizio_id"]:
+                update_fields.append("tipologia_servizio_id = :tipologia_servizio_id")
+                params["tipologia_servizio_id"] = article_data["tipologia_servizio_id"]
+            else:
+                update_fields.append("tipologia_servizio_id = NULL")
+                
+        if "partner_id" in article_data:
+            if article_data["partner_id"]:
+                update_fields.append("partner_id = :partner_id")
+                params["partner_id"] = article_data["partner_id"]
+            else:
+                update_fields.append("partner_id = NULL")
+                
+        if "responsabile_user_id" in article_data:
+            if article_data["responsabile_user_id"]:
+                update_fields.append("responsabile_user_id = :responsabile_user_id")
+                params["responsabile_user_id"] = article_data["responsabile_user_id"]
+            else:
+                update_fields.append("responsabile_user_id = NULL")
+                
+        if "prezzo_base" in article_data:
+            if article_data["prezzo_base"]:
+                update_fields.append("prezzo_base = :prezzo_base")
+                params["prezzo_base"] = article_data["prezzo_base"]
+            else:
+                update_fields.append("prezzo_base = NULL")
+                
+        if "durata_mesi" in article_data:
+            if article_data["durata_mesi"]:
+                update_fields.append("durata_mesi = :durata_mesi")
+                params["durata_mesi"] = article_data["durata_mesi"]
+            else:
+                update_fields.append("durata_mesi = NULL")
+                
+        if "modello_ticket_id" in article_data:
+            if article_data["modello_ticket_id"]:
+                update_fields.append("modello_ticket_id = :modello_ticket_id")
+                params["modello_ticket_id"] = article_data["modello_ticket_id"]
+            else:
+                update_fields.append("modello_ticket_id = NULL")
+        
+        if not update_fields:
+            return {"success": False, "detail": "Nessun campo da aggiornare"}
+        
+        # Esegui l'update
+        update_query = text(f"""
+        UPDATE articoli 
+        SET {', '.join(update_fields)}, updated_at = CURRENT_TIMESTAMP
+        WHERE id = :article_id
+        """)
+        
+        db.execute(update_query, params)
+        db.commit()
+        
+        return {"success": True, "message": "Articolo aggiornato con successo"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        return {"success": False, "detail": str(e)}
+
+@router.delete("/{article_id}")
+async def delete_article(article_id: int, db: Session = Depends(get_db)):
+    """Disattiva articolo (soft delete)"""
+    try:
+        # Verifica che l'articolo esista
+        check_query = text("SELECT codice FROM articoli WHERE id = :article_id")
+        articolo = db.execute(check_query, {"article_id": article_id}).first()
+        
+        if not articolo:
+            raise HTTPException(status_code=404, detail="Articolo non trovato")
+        
+        # Soft delete - disattiva l'articolo
+        delete_query = text("""
+        UPDATE articoli 
+        SET attivo = false, updated_at = CURRENT_TIMESTAMP
+        WHERE id = :article_id
+        """)
+        db.execute(delete_query, {"article_id": article_id})
+        db.commit()
+        
+        return {
+            "success": True,
+            "message": f"Articolo {articolo.codice} disattivato con successo"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        print(f"❌ Errore delete_article: {e}")
+        raise HTTPException(status_code=500, detail=f"Errore eliminazione: {str(e)}")

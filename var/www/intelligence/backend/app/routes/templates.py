@@ -14,7 +14,7 @@ from app.models.tipi_commesse import ModelloTask
 from app.models.ticket_templates import ModelloTicket
 from app.models.users import User
 
-router = APIRouter(prefix="/api/v1/templates", tags=["Template Management"])
+router = APIRouter(tags=["Template Management"])
 
 # TICKET TEMPLATES
 @router.post("/ticket-templates", response_model=TicketTemplateResponse)
