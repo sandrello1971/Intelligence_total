@@ -168,7 +168,7 @@ const ArticlesFilters: React.FC<ArticlesFiltersProps> = ({
                   className="filter-select"
                 >
                   <option value="">Tutte le tipologie</option>
-                  {tipologie.map((tipo) => (
+                  {(tipologie || []).map((tipo) => (
                     <option key={tipo.id} value={tipo.nome}>
                       {tipo.nome}
                     </option>

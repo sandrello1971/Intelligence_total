@@ -8,9 +8,15 @@ import {
   fetchPartners,
   fetchAvailableUsers,
   fetchTicketTemplates
-} from '../../api/articles-api'; // Adatta se serve
+} from '../../api/articles-api';
 
-import { ArticleFormData, TipologiaServizio, Partner, User, ModelloTicket } from '../../components/articles/types';
+import {
+  ArticleFormData,
+  TipologiaServizio,
+  Partner,
+  User,
+  ModelloTicket
+} from '../../components/articles/types';
 
 const ArticlesManagement: React.FC = () => {
   const [items, setItems] = useState<ArticleFormData[]>([]);
@@ -96,10 +102,10 @@ const ArticlesManagement: React.FC = () => {
           onSubmit={handleUpdateArticle}
           formData={selectedItem}
           setFormData={setSelectedItem}
-          tipologie={tipologie}
-          partnerFiltrati={partners}
-          availableUsers={availableUsers}
-          modelliTicket={modelliTicket}
+          tipologie={tipologie || []}
+          partnerFiltrati={partners || []}
+          availableUsers={availableUsers || []}
+          modelliTicket={modelliTicket || []}
         />
       )}
 
@@ -108,10 +114,10 @@ const ArticlesManagement: React.FC = () => {
           show={showCreateModal}
           onClose={() => setShowCreateModal(false)}
           onSubmit={handleCreateArticle}
-          tipologie={tipologie}
-          partnerFiltrati={partners}
-          availableUsers={availableUsers}
-          modelliTicket={modelliTicket}
+          tipologie={tipologie || []}
+          partnerFiltrati={partners || []}
+          availableUsers={availableUsers || []}
+          modelliTicket={modelliTicket || []}
         />
       )}
     </div>

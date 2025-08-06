@@ -173,7 +173,7 @@ const ArticleConfiguration: React.FC = () => {
                     className="form-select"
                   >
                     <option value="">Seleziona tipologia...</option>
-                    {tipologie.map((tipo) => (
+                    {(tipologie || []).map((tipo) => (
                       <option key={tipo.id} value={tipo.nome}>
                         {tipo.nome}
                       </option>
