@@ -1,0 +1,84 @@
+# app/core/config.py - Configuration Settings for Intelligence Platform
+
+import os
+from typing import Optional
+from pydantic_settings import BaseSettings
+
+class Settings(BaseSettings):
+    """
+    Intelligence Platform Configuration
+    """
+    
+    # Application
+    APP_NAME: str = "Intelligence Platform API"
+    VERSION: str = "5.0"
+    DEBUG: bool = False
+    
+    # Database
+    DATABASE_URL: str = "postgresql://intelligence_user:intelligence_pass@localhost:5432/intelligence"
+    DB_HOST: str = "localhost"
+    DB_NAME: str = "intelligence" 
+    DB_USER: str = "intelligence_user"
+    DB_PASSWORD: str = "intelligence_pass"
+    DB_PORT: int = 5432
+    
+    # JWT Authentication
+    JWT_SECRET: str = "intelligence_jwt_secret_key_2025"
+    JWT_ALGORITHM: str = "HS256"
+    JWT_EXPIRE_MINUTES: int = 30
+    
+    # Security & Server
+    SECRET_KEY: str = "intelligence_super_secret_key_2025"
+    ALGORITHM: str = "HS256"
+    ALLOWED_HOSTS: str = "*"
+    CORS_ORIGINS: str = "*"
+    HOST: str = "0.0.0.0"
+    PORT: int = 8000
+    RELOAD: bool = True
+    
+    # API Keys
+    OPENAI_API_KEY: Optional[str] = None
+    OPENAI_MODEL: Optional[str] = "gpt-4o"
+    
+    # CRM Integration
+    CRM_API_KEY: Optional[str] = None
+    CRM_USERNAME: Optional[str] = None
+    CRM_PASSWORD: Optional[str] = None
+    CRM_ACCESS_TOKEN: Optional[str] = None
+    CRM_BASE_URL: str = "https://api.crmincloud.it"
+    
+    # Google OAuth
+    GOOGLE_CLIENT_ID: Optional[str] = None
+    GOOGLE_CLIENT_SECRET: Optional[str] = None
+    GOOGLE_REDIRECT_URI: Optional[str] = None
+    FRONTEND_URL: str = "https://intelligencehub.enduser-digital.com"
+    
+    # Web Scraping
+    SCRAPING_USER_AGENT: str = "IntelligenceBot/5.0"
+    SCRAPING_DELAY: float = 1.0
+    
+    # File paths
+    BASE_DIR: str = "/var/www/intelligence"
+    LOG_LEVEL: str = "INFO"
+    
+    # Email Configuration
+    SMTP_SERVER: str = "ssl0.ovh.net"
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: str = "noreply@enduser-digital.com"
+    SMTP_PASSWORD: Optional[str] = None
+    EMAIL_FROM: str = "noreply@enduser-digital.com"
+    EMAIL_FROM_NAME: str = "Intelligence Platform"
+    ENABLE_EMAIL_NOTIFICATIONS: bool = True
+    SLA_WARNING_DAYS: int = 2
+    SLA_CHECK_HOURS: str = "09:00,14:00,17:00"
+    
+    class Config:
+        env_file = ".env"
+        case_sensitive = True
+
+# Create global settings instance
+settings = Settings()
+
+# Override DATABASE_URL if individual components are provided
+if not settings.DATABASE_URL.startswith("postgresql://"):
+    settings.DATABASE_URL = f"postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"

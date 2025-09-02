@@ -1,0 +1,56 @@
+# app/core/config.py - Configuration Settings for Intelligence Platform
+
+import os
+from typing import Optional
+from pydantic_settings import BaseSettings
+
+class Settings(BaseSettings):
+    """
+    Intelligence Platform Configuration
+    """
+    
+    # Application
+    APP_NAME: str = "Intelligence Platform API"
+    VERSION: str = "5.0"
+    DEBUG: bool = False
+    
+    # Database
+    DATABASE_URL: str = "postgresql://intelligence_user:intelligence_pass@localhost:5432/intelligence"
+    DB_HOST: str = "localhost"
+    DB_NAME: str = "intelligence" 
+    DB_USER: str = "intelligence_user"
+    DB_PASSWORD: str = "intelligence_pass"
+    DB_PORT: int = 5432
+    
+    # JWT Authentication
+    JWT_SECRET: str = "intelligence_jwt_secret_key_2025"
+    JWT_ALGORITHM: str = "HS256"
+    JWT_EXPIRE_MINUTES: int = 30
+    
+    # API Keys
+    OPENAI_API_KEY: Optional[str] = None
+    
+    # CRM Integration
+    CRM_API_KEY: Optional[str] = None
+    CRM_USERNAME: Optional[str] = None
+    CRM_PASSWORD: Optional[str] = None
+    CRM_BASE_URL: str = "https://api.crmincloud.it"
+    
+    # Web Scraping
+    SCRAPING_USER_AGENT: str = "IntelligenceBot/5.0"
+    SCRAPING_DELAY: float = 1.0
+    
+    # File paths
+    BASE_DIR: str = "/var/www/intelligence"
+    LOG_LEVEL: str = "INFO"
+    
+    class Config:
+        env_file = ".env"
+        case_sensitive = True
+
+# Create global settings instance
+settings = Settings()
+
+# Override DATABASE_URL if individual components are provided
+if not settings.DATABASE_URL.startswith("postgresql://"):
+    settings.DATABASE_URL = f"postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"

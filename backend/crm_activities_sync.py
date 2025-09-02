@@ -1,0 +1,1 @@
+/var/www/intelligence/crm_activities_sync.py
