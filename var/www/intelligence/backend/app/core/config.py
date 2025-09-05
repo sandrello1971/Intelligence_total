@@ -1,88 +1,85 @@
-# app/core/config.py
+# app/core/config.py - Configuration Settings for Intelligence Platform
+
+import os
+from typing import Optional
 from pydantic_settings import BaseSettings
-from typing import Optional, List
-import json
 
 class Settings(BaseSettings):
-    # Base settings
-    PROJECT_NAME: str = "IntelligenceHUB"
-    VERSION: str = "5.0.0"
+    """
+    Intelligence Platform Configuration
+    """
+    
+    # Application
+    APP_NAME: str = "Intelligence Platform API"
+    VERSION: str = "5.0"
     DEBUG: bool = False
     
-    # Domain and URLs
-    DOMAIN: str = "intelligencehub.enduser-digital.com"
-    API_BASE_URL: str = "https://intelligencehub.enduser-digital.com/api"
-    FRONTEND_URL: str = "https://intelligencehub.enduser-digital.com"
-    
-    # Database settings
+    # Database
     DATABASE_URL: str = "postgresql://intelligence_user:intelligence_pass@localhost:5432/intelligence"
     DB_HOST: str = "localhost"
-    DB_PORT: int = 5432
+    DB_NAME: str = "intelligence" 
     DB_USER: str = "intelligence_user"
     DB_PASSWORD: str = "intelligence_pass"
-    DB_NAME: str = "intelligence"
+    DB_PORT: int = 5432
     
-    # Security/JWT
-    SECRET_KEY: str = "EU1nt3ll1g3nc3_2025!"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    ALGORITHM: str = "HS256"
-    
-    # JWT Settings
-    JWT_SECRET: str = "EU1nt3ll1g3nc3_2025!"
+    # JWT Authentication
+    JWT_SECRET: str = "intelligence_jwt_secret_key_2025"
     JWT_ALGORITHM: str = "HS256"
-    JWT_EXPIRATION_HOURS: int = 24
+    JWT_EXPIRE_MINUTES: int = 30
+    JWT_EXPIRATION_HOURS: int = 24  # JWT token expiration in hours
     
-    # CRM Settings
-    CRM_USERNAME: str = "intellivoice@enduser-digital.com"
-    CRM_PASSWORD: str = "B4b4in4_07"
-    CRM_API_KEY: str = "r5l50i5lvd.YjuIXg0PPJnqzeldzCBlEpMlwqJPRPFgJppSkPu"
+    # Security & Server
+    SECRET_KEY: str = "intelligence_super_secret_key_2025"
+    ALGORITHM: str = "HS256"
+    ALLOWED_HOSTS: str = "*"
+    CORS_ORIGINS: str = "*"
+    HOST: str = "0.0.0.0"
+    PORT: int = 8000
+    RELOAD: bool = True
+    
+    # API Keys
+    OPENAI_API_KEY: Optional[str] = None
+    OPENAI_MODEL: Optional[str] = "gpt-4o"
+    
+    # CRM Integration
+    CRM_API_KEY: Optional[str] = None
+    CRM_USERNAME: Optional[str] = None
+    CRM_PASSWORD: Optional[str] = None
+    CRM_ACCESS_TOKEN: Optional[str] = None
     CRM_BASE_URL: str = "https://api.crmincloud.it"
     
-    # OpenAI
-    OPENAI_API_KEY: str = "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"
-    OPENAI_MODEL: str = "gpt-4-turbo"
+    # Google OAuth
+    GOOGLE_CLIENT_ID: Optional[str] = None
+    GOOGLE_CLIENT_SECRET: Optional[str] = None
+    GOOGLE_REDIRECT_URI: Optional[str] = None
+    FRONTEND_URL: str = "https://intelligencehub.enduser-digital.com"
     
-    # Email/SMTP
+    # Web Scraping
+    SCRAPING_USER_AGENT: str = "IntelligenceBot/5.0"
+    SCRAPING_DELAY: float = 1.0
+    
+    # File paths
+    BASE_DIR: str = "/var/www/intelligence"
+    LOG_LEVEL: str = "INFO"
+    
+    # Email Configuration
     SMTP_SERVER: str = "ssl0.ovh.net"
     SMTP_PORT: int = 587
-    SMTP_USERNAME: str = "intellivoice@enduser-digital.com"
-    SMTP_PASSWORD: str = "EuIntellivoice!2025"
-    EMAIL_FROM: str = "intellivoice@enduser-digital.com"
-    EMAIL_FROM_NAME: str = "Intelligence Hub"
+    SMTP_USERNAME: str = "noreply@enduser-digital.com"
+    SMTP_PASSWORD: Optional[str] = None
+    EMAIL_FROM: str = "noreply@enduser-digital.com"
+    EMAIL_FROM_NAME: str = "Intelligence Platform"
     ENABLE_EMAIL_NOTIFICATIONS: bool = True
-    
-    # SLA Settings
     SLA_WARNING_DAYS: int = 2
     SLA_CHECK_HOURS: str = "09:00,14:00,17:00"
-    
-    # Qdrant Vector DB
-    QDRANT_HOST: str = "localhost"
-    QDRANT_PORT: int = 6333
-    QDRANT_TIMEOUT: int = 30
-    QDRANT_COLLECTION_NAME: str = "intelligence_knowledge"
-    
-    # RAG Settings
-    RAG_CHUNK_SIZE: int = 1000
-    RAG_CHUNK_OVERLAP: int = 200
-    RAG_SIMILARITY_THRESHOLD: float = 0.7
-    RAG_MAX_RESULTS: int = 10
-    
-    # FastAPI Settings
-    FASTAPI_HOST: str = "0.0.0.0"
-    FASTAPI_PORT: int = 8000
-    FASTAPI_DEBUG: bool = True
-    FASTAPI_RELOAD: bool = True
-    
-    # CORS Settings
-    CORS_ORIGINS: str = '["https://intelligencehub.enduser-digital.com", "http://localhost:3000"]'
-    CORS_CREDENTIALS: bool = True
-    CORS_METHODS: str = '["*"]'
-    CORS_HEADERS: str = '["*"]'
     
     class Config:
         env_file = ".env"
         case_sensitive = True
-        # Ignore extra fields to prevent validation errors
-        extra = "ignore"
 
+# Create global settings instance
 settings = Settings()
+
+# Override DATABASE_URL if individual components are provided
+if not settings.DATABASE_URL.startswith("postgresql://"):
+    settings.DATABASE_URL = f"postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"

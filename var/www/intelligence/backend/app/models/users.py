@@ -24,6 +24,12 @@ class User(Base):
     last_login = Column(DateTime(timezone=False))
     must_change_password = Column(Boolean, default=False)
     crm_id = Column(Integer)
+
+    # Google Authentication fields
+    google_id = Column(String(255), index=True)
+    google_credentials = Column(Text)
+    auto_sync_enabled = Column(Boolean, default=False)
+    last_sync_at = Column(DateTime(timezone=False))
     
     def __repr__(self):
         return f"<User {self.username}>"

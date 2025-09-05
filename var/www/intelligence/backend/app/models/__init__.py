@@ -53,8 +53,7 @@ try:
 except ImportError:
     pass
 from .articles import Articolo
-from .kit_commerciali_db import KitCommerciale, KitArticoloDB
-
+from .kit_commerciali import KitCommerciale, KitArticolo
 from .er_models import TaskGlobal, WkfRow, TicketRow
 from .users import User
 from .partner import Partner

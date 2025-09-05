@@ -37,6 +37,26 @@ const TipologieServizi: React.FC = () => {
   });
 
   // Icone disponibili
+  // Mapping icone da stringhe a emoji
+  const iconMapping: { [key: string]: string } = {
+    "briefcase": "💼",
+    "monitor": "💻", 
+    "dollar-sign": "💰",
+    "graduation-cap": "🎓",
+    "📋": "📋",
+    "💼": "💼",
+    "🔧": "🔧",
+    "💻": "💻",
+    "📊": "📊",
+    "🎯": "🎯",
+    "🚀": "🚀",
+    "⚙️": "⚙️",
+    "📱": "📱",
+    "🌐": "🌐",
+    "💰": "💰",
+    "🎓": "🎓"
+  };
+
   const iconeDisponibili = ['📋', '💼', '🔧', '💻', '📊', '🎯', '🚀', '⚙️', '📱', '🌐'];
   
   // Colori disponibili
@@ -199,7 +219,7 @@ const TipologieServizi: React.FC = () => {
           <div key={tipologia.id} className="tipologia-card">
             <div className="tipologia-header">
               <div className="tipologia-icon" style={{ backgroundColor: tipologia.colore + '20', color: tipologia.colore }}>
-                {tipologia.icona}
+                {iconMapping[tipologia.icona] || tipologia.icona}
               </div>
               <div className="tipologia-info">
                 <h3>{tipologia.nome}</h3>

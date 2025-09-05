@@ -33,11 +33,10 @@ interface TaskTemplate {
   nome: string;
   descrizione: string;
   ordine: number;
-  sla_hours: number;        // ✅ CORRETTO (era durata_stimata_ore)
+  durata_stimata_ore: number;
   ruolo_responsabile: string;
-  is_required: boolean;     // ✅ CORRETTO (era obbligatorio)
-  priorita: string;         // ✅ CORRETTO (era tipo_task)
-  created_at: string;
+  obbligatorio: boolean;
+  tipo_task: string;
 }
 
 interface MilestoneTaskManagerProps {
@@ -310,20 +309,20 @@ const MilestoneTaskManager: React.FC<MilestoneTaskManagerProps> = ({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                   <strong>{task.nome}</strong>
                   <span style={{
-                    background: task.priorita === 'generale' ? '#1976d2' : '#666',
+                    background: task.tipo_task === 'generale' ? '#1976d2' : '#666',
                     color: 'white',
                     padding: '2px 6px',
                     borderRadius: '4px',
                     fontSize: '11px'
                   }}>
-                    {task.priorita}
+                    {task.tipo_task}
                   </span>
                 </div>
                 <div style={{ color: '#666', fontSize: '14px', marginBottom: '4px' }}>
                   {task.descrizione}
                 </div>
                 <div style={{ fontSize: '12px', color: '#999' }}>
-                  ⏱️ {task.sla_hours}h {task.ruolo_responsabile && `👤 ${task.ruolo_responsabile}`}
+                  ⏱️ {task.durata_stimata_ore}h {task.ruolo_responsabile && `👤 ${task.ruolo_responsabile}`}
                 </div>
               </div>
 

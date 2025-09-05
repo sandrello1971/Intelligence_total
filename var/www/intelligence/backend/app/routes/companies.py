@@ -26,12 +26,11 @@ async def list_companies(
 ):
     """List companies with advanced search and filters"""
     try:
-        # Base query
+        # Base query con colonne esistenti
         base_query = """
-            SELECT id, codice, name, partita_iva, codice_fiscale, indirizzo, 
+            SELECT id, name, partita_iva, codice_fiscale, indirizzo, 
                    citta, cap, provincia, regione, stato, settore, numero_dipendenti,
-                   data_acquisizione, note, sito_web, email, telefono, score,
-                   zona_commerciale, sales_persons, created_at,
+                   sito_web, email, telefono, created_at,
                    is_partner, is_supplier, partner_category, partner_description,
                    partner_expertise, partner_rating, partner_status,
                    last_scraped_at, scraping_status, ai_analysis_summary
@@ -87,7 +86,6 @@ async def list_companies(
             companies=[
                 CompanyResponse(
                     id=comp.id,
-                    codice=comp.codice,
                     name=comp.name,
                     partita_iva=comp.partita_iva,
                     codice_fiscale=comp.codice_fiscale,
@@ -99,14 +97,9 @@ async def list_companies(
                     stato=comp.stato,
                     settore=comp.settore,
                     numero_dipendenti=comp.numero_dipendenti,
-                    data_acquisizione=comp.data_acquisizione,
-                    note=comp.note,
                     sito_web=comp.sito_web,
                     email=comp.email,
                     telefono=comp.telefono,
-                    score=comp.score,
-                    zona_commerciale=comp.zona_commerciale,
-                    sales_persons=comp.sales_persons,
                     created_at=comp.created_at,
                     is_partner=comp.is_partner or False,
                     is_supplier=comp.is_supplier or False,
@@ -130,6 +123,7 @@ async def list_companies(
     except Exception as e:
         logger.error(f"Error listing companies: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
 @router.get("/search")
 async def search_companies_autocomplete(
     q: str = Query(..., description="Search query", min_length=2),
@@ -165,21 +159,18 @@ async def search_companies_autocomplete(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
-
 @router.get("/{company_id}", response_model=CompanyResponse)
 async def get_company(company_id: int, db: Session = Depends(get_db)):
     """Get single company by ID"""
     try:
         query = """
-            SELECT id, codice, name, partita_iva, codice_fiscale, indirizzo, 
+            SELECT id, name, partita_iva, codice_fiscale, indirizzo, 
                    citta, cap, provincia, regione, stato, settore, numero_dipendenti,
-                   data_acquisizione, note, sito_web, email, telefono, score,
-                   zona_commerciale, sales_persons, created_at,
+                   sito_web, email, telefono, created_at,
                    is_partner, is_supplier, partner_category, partner_description,
                    partner_expertise, partner_rating, partner_status,
                    last_scraped_at, scraping_status, ai_analysis_summary
-            FROM companies 
+            FROM companies
             WHERE id = :id
         """
         
@@ -191,7 +182,6 @@ async def get_company(company_id: int, db: Session = Depends(get_db)):
         
         return CompanyResponse(
             id=company.id,
-            codice=company.codice,
             name=company.name,
             partita_iva=company.partita_iva,
             codice_fiscale=company.codice_fiscale,
@@ -203,14 +193,9 @@ async def get_company(company_id: int, db: Session = Depends(get_db)):
             stato=company.stato,
             settore=company.settore,
             numero_dipendenti=company.numero_dipendenti,
-            data_acquisizione=company.data_acquisizione,
-            note=company.note,
             sito_web=company.sito_web,
             email=company.email,
             telefono=company.telefono,
-            score=company.score,
-            zona_commerciale=company.zona_commerciale,
-            sales_persons=company.sales_persons,
             created_at=company.created_at,
             is_partner=company.is_partner or False,
             is_supplier=company.is_supplier or False,
@@ -228,73 +213,6 @@ async def get_company(company_id: int, db: Session = Depends(get_db)):
         raise
     except Exception as e:
         logger.error(f"Error getting company {company_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.put("/{company_id}", response_model=CompanyResponse)
-async def update_company(
-    company_id: int, 
-    company_data: CompanyUpdate, 
-    db: Session = Depends(get_db)
-):
-    """Update company"""
-    try:
-        # Check if exists
-        check_query = "SELECT id FROM companies WHERE id = :id"
-        result = db.execute(text(check_query), {"id": company_id})
-        if not result.fetchone():
-            raise HTTPException(status_code=404, detail="Company not found")
-        
-        # Build update query dynamically
-        update_fields = []
-        params = {"id": company_id}
-        
-        # Map Pydantic model to database fields
-        field_mapping = {
-            "name": "name",
-            "partita_iva": "partita_iva",
-            "codice_fiscale": "codice_fiscale",
-            "indirizzo": "indirizzo",
-            "citta": "citta",
-            "provincia": "provincia",
-            "regione": "regione",
-            "settore": "settore",
-            "numero_dipendenti": "numero_dipendenti",
-            "sito_web": "sito_web",
-            "email": "email",
-            "telefono": "telefono",
-            "note": "note",
-            "is_partner": "is_partner",
-            "is_supplier": "is_supplier",
-            "partner_category": "partner_category",
-            "partner_description": "partner_description",
-            "partner_expertise": "partner_expertise",
-            "partner_rating": "partner_rating",
-            "partner_status": "partner_status"
-        }
-        
-        # Only update fields that are provided (not None)
-        for pydantic_field, db_field in field_mapping.items():
-            value = getattr(company_data, pydantic_field, None)
-            if value is not None:
-                update_fields.append(f"{db_field} = :{pydantic_field}")
-                params[pydantic_field] = value
-        
-        if update_fields:
-            query = f"UPDATE companies SET {', '.join(update_fields)} WHERE id = :id"
-            db.execute(text(query), params)
-            db.commit()
-            
-            # Return updated company
-            return await get_company(company_id, db)
-        else:
-            # No fields to update, return current company
-            return await get_company(company_id, db)
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        db.rollback()
-        logger.error(f"Error updating company {company_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/stats/overview")
@@ -330,4 +248,65 @@ async def get_companies_stats(db: Session = Depends(get_db)):
         logger.error(f"Error getting companies stats: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-
+@router.put("/{company_id}", response_model=CompanyResponse)
+async def update_company(
+    company_id: int, 
+    company_data: CompanyUpdate, 
+    db: Session = Depends(get_db)
+):
+    """Update company"""
+    try:
+        # Check if exists
+        check_query = "SELECT id FROM companies WHERE id = :id"
+        result = db.execute(text(check_query), {"id": company_id})
+        if not result.fetchone():
+            raise HTTPException(status_code=404, detail="Company not found")
+        
+        # Build update query dynamically
+        update_fields = []
+        params = {"id": company_id}
+        
+        # Map Pydantic model to database fields
+        field_mapping = {
+            "name": "name",
+            "partita_iva": "partita_iva",
+            "codice_fiscale": "codice_fiscale",
+            "indirizzo": "indirizzo",
+            "citta": "citta",
+            "provincia": "provincia",
+            "regione": "regione",
+            "settore": "settore",
+            "numero_dipendenti": "numero_dipendenti",
+            "sito_web": "sito_web",
+            "email": "email",
+            "telefono": "telefono",
+            "is_partner": "is_partner",
+            "is_supplier": "is_supplier",
+            "partner_category": "partner_category",
+            "partner_description": "partner_description",
+            "partner_expertise": "partner_expertise",
+            "partner_rating": "partner_rating",
+            "partner_status": "partner_status"
+        }
+        
+        # Only update fields that are provided (not None)
+        for pydantic_field, db_field in field_mapping.items():
+            value = getattr(company_data, pydantic_field, None)
+            if value is not None:
+                update_fields.append(f"{db_field} = :{pydantic_field}")
+                params[pydantic_field] = value
+        
+        if update_fields:
+            query = f"UPDATE companies SET {', '.join(update_fields)} WHERE id = :id"
+            db.execute(text(query), params)
+            db.commit()
+        
+        # Return updated company
+        return await get_company(company_id, db)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Error updating company {company_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))

@@ -34,7 +34,7 @@ def import_companies_from_excel():
     session = SessionLocal()
     try:
         # Read Excel file
-        df = pd.read_excel("export_azienda_20250611042040.xlsx")
+        df = pd.read_excel("exportazienda20250806083432.xlsx")
         print(f"📊 Found {len(df)} companies in Excel file")
         
         # Show columns mapping

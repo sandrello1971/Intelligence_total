@@ -278,7 +278,7 @@ class CRMWorkflowSync:
             # Trova responsabile dal kit commerciale
             owner_user_id = None
             try:
-                from app.models.kit_commerciali_db import KitCommerciale, KitArticoloDB
+                from app.models.kit_commerciali import KitCommerciale, KitArticolo
                 from app.models.articoli import Articolo
                 
                 kit = self.db.query(KitCommerciale).filter(
@@ -287,8 +287,8 @@ class CRMWorkflowSync:
                 
                 if kit:
                     # Prendi il primo articolo con responsabile
-                    kit_articolo = self.db.query(KitArticoloDB).join(Articolo).filter(
-                        KitArticoloDB.kit_commerciale_id == kit.id,
+                    kit_articolo = self.db.query(KitArticolo).join(Articolo).filter(
+                        KitArticolo.kit_commerciale_id == kit.id,
                         Articolo.responsabile_user_id.isnot(None)
                     ).first()
                     

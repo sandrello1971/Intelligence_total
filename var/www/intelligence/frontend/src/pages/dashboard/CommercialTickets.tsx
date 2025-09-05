@@ -90,7 +90,7 @@ const CommercialTickets: React.FC = () => {
           <Tab 
             icon={<AddIcon />} 
             label="Crea Ticket" 
-            {...a11yProps(0)}
+            {...a11yProps(1)}
             sx={{ 
               minHeight: 72,
               '& .MuiTab-iconWrapper': { 
@@ -100,8 +100,8 @@ const CommercialTickets: React.FC = () => {
           />
           <Tab 
             icon={<TreeIcon />} 
-            label="Vista Albero" 
-            {...a11yProps(1)}
+            label="TIcket Operativi" 
+            {...a11yProps(0)}
             sx={{ 
               minHeight: 72,
               '& .MuiTab-iconWrapper': { 
@@ -113,14 +113,14 @@ const CommercialTickets: React.FC = () => {
       </Paper>
 
       {/* Tab Content */}
-      <TabPanel value={activeTab} index={0}>
+      <TabPanel value={activeTab} index={1}>
         <CommercialTicketForm 
           onSuccess={handleCommessaCreated}
           onError={handleError}
         />
       </TabPanel>
 
-      <TabPanel value={activeTab} index={1}>
+      <TabPanel value={activeTab} index={0}>
         <TicketHierarchyView 
           refreshTrigger={refreshTrigger}
         />

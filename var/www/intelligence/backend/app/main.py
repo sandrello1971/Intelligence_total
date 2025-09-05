@@ -24,23 +24,6 @@ from app.routes import wiki
 from app.routes import rag_routes
 from app.routes import intellivoice_record
 
-from app.routes import tasks_global
-from app.routes import tasks
-from app.routes.auth_google import router as google_auth_router
-
-# Workflow Configuration Routes
-from app.routes.admin import workflow_config, workflow_management
-
-
-from app.routes.admin import milestone_templates
-
-from app.routes import templates
-from app.routes import servizi_template
-from app.routes import tickets
-from app.routes import kit_articoli
-
-
-
 # Database
 from app.database import create_tables
 # Rate limiting storage (in-memory, non invasivo)
@@ -65,20 +48,6 @@ app = FastAPI(
     version="5.0",
     lifespan=lifespan
 )
-
-
-app.include_router(tasks_global.router, prefix="/api/v1")
-app.include_router(tasks.router, prefix="/api/v1")
-app.include_router(google_auth_router)
-app.include_router(workflow_config.router)
-app.include_router(workflow_management.router)
-app.include_router(milestone_templates.router)
-app.include_router(wiki.router, prefix="/api/v1", tags=["wiki"])
-app.include_router(rag_routes.router, prefix="/api/v1", tags=["rag"])
-app.include_router(templates.router, prefix="/api/v1/templates", tags=["ticket templates"])
-app.include_router(servizi_template.router)
-app.include_router(tickets.router, prefix="/api/v1", tags=["tickets"])
-app.include_router(kit_articoli.router, prefix="/api/v1", tags=["Kit Articoli"])
 
 # CORS middleware
 app.add_middleware(
@@ -346,3 +315,28 @@ async def update_user_temp(user_id: str, request: dict):
         return {"error": str(e)}
     finally:
         db.close()
+from app.routes import tasks_global
+from app.routes import tasks
+from app.routes.auth_google import router as google_auth_router
+app.include_router(tasks_global.router, prefix="/api/v1")
+app.include_router(tasks.router, prefix="/api/v1")
+app.include_router(google_auth_router)
+
+# Workflow Configuration Routes
+from app.routes.admin import workflow_config, workflow_management
+
+app.include_router(workflow_config.router)
+app.include_router(workflow_management.router)
+
+
+from app.routes.admin import milestone_templates
+app.include_router(milestone_templates.router)
+app.include_router(wiki.router, prefix="/api/v1", tags=["wiki"])
+app.include_router(rag_routes.router, prefix="/api/v1", tags=["rag"])
+
+from app.routes import templates
+from app.routes import servizi_template
+from app.routes import tickets
+app.include_router(templates.router)
+app.include_router(servizi_template.router)
+app.include_router(tickets.router, prefix="/api/v1", tags=["tickets"])

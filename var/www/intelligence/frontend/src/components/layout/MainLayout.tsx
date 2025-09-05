@@ -24,13 +24,6 @@ const MainLayout: React.FC = () => {
     { path: '/workflow-management', icon: '⚙️', label: 'Workflow Management' },
     { path: "/tasks", icon: "⏰", label: "Modelli Task" },
     { path: "/modelli-ticket", icon: "🎫", label: "Modelli Ticket" },
-    { path: "/servizi-template", icon: "🔗", label: "Servizi-Template" },
-    { path: '/chat', icon: '🤖', label: 'IntelliChatAI' },
-    { path: '/documents', icon: '📚', label: 'Document RAG' },
-    { path: '/web-scraping', icon: '🕷️', label: 'Web Scraping' },
-    { path: '/assessment', icon: '📊', label: 'Assessment' },
-    { path: '/email-center', icon: '📧', label: 'Email Center' },
-    { path: '/wiki', icon: '📖', label: 'Wiki' },
   ];
 
   return (
@@ -50,10 +43,10 @@ const MainLayout: React.FC = () => {
           marginBottom: '20px'
         }}>
           <h1 style={{ fontSize: '22px', fontWeight: 700, margin: '0 0 5px 0' }}>
-            🧠 IntelligenceHUB
+            🎫 Ticketing System
           </h1>
           <p style={{ fontSize: '12px', opacity: 0.8, margin: 0 }}>
-            v5.0 - AI Business Platform
+            v5.0 - Ticket Management System
           </p>
         </div>
 

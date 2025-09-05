@@ -1,162 +1,404 @@
+// pages/wiki/WikiPage.tsx
+// Main Wiki page component
+
 import React, { useState, useEffect } from 'react';
+import {
+  Box,
+  Container,
+  Typography,
+  Tabs,
+  Tab,
+  Paper,
+  Grid,
+  Card,
+  CardContent,
+  Button,
+  Alert,
+  CircularProgress,
+  Breadcrumbs,
+  Link
+} from '@mui/material';
+import {
+  MenuBook as WikiIcon,
+  CloudUpload as UploadIcon,
+  List as ListIcon,
+  BarChart as StatsIcon,
+  Chat as ChatIcon,
+  Home as HomeIcon
+} from '@mui/icons-material';
 
-interface WikiCategory {
-  id: string;
-  name: string;
-  description?: string;
+import WikiUploader from '../../components/wiki/WikiUploader';
+import WikiPageList from '../../components/wiki/WikiPageList';
+import { wikiService, WikiCategory, WikiPage, WikiStats, WikiUploadResult } from '../../services/wikiService';
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
 }
 
-interface WikiStats {
-  totalPages: number;
-  totalCategories: number;
-  recentUpdates: number;
-}
+const TabPanel: React.FC<TabPanelProps> = ({ children, value, index, ...other }) => {
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`wiki-tabpanel-${index}`}
+      aria-labelledby={`wiki-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ py: 3 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+};
 
-const WikiPage: React.FC = () => {
+export const WikiPage: React.FC = () => {
   const [currentTab, setCurrentTab] = useState(0);
   const [categories, setCategories] = useState<WikiCategory[]>([]);
   const [stats, setStats] = useState<WikiStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // Load initial data
   useEffect(() => {
-    // Simula caricamento dati
-    setTimeout(() => {
-      setCategories([
-        { id: '1', name: 'Generale', description: 'Informazioni generali' },
-        { id: '2', name: 'Procedure', description: 'Procedure operative' }
-      ]);
-      setStats({
-        totalPages: 45,
-        totalCategories: 8,
-        recentUpdates: 12
-      });
-      setLoading(false);
-    }, 1000);
+    loadInitialData();
   }, []);
+
+  const loadInitialData = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Load categories and stats in parallel
+      const [categoriesResponse, statsResponse] = await Promise.all([
+        wikiService.getCategories(),
+        wikiService.getStats()
+      ]);
+
+      if (categoriesResponse.success && categoriesResponse.data) {
+        setCategories(categoriesResponse.data);
+      }
+
+      if (statsResponse.success && statsResponse.data) {
+        setStats(statsResponse.data);
+      }
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Errore nel caricamento dei dati');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setCurrentTab(newValue);
+  };
+
+  const handleUploadSuccess = (result: WikiUploadResult) => {
+    // Refresh stats after successful upload
+    loadInitialData();
+    
+    // Switch to pages list if a page was created
+    if (result.wiki_page_id) {
+      setCurrentTab(1); // Switch to "Pagine" tab
+    }
+
+    // Show success message
+    console.log('Upload successful:', result);
+  };
+
+  const handleUploadError = (error: string) => {
+    console.error('Upload error:', error);
+  };
+
+  const handlePageSelect = (page: WikiPage) => {
+    // Navigate to page view (implement navigation)
+    console.log('Selected page:', page);
+  };
+
+  const handlePageEdit = (page: WikiPage) => {
+    // Navigate to page editor (implement navigation)
+    console.log('Edit page:', page);
+  };
+
+  const handlePageDelete = async (page: WikiPage) => {
+    if (window.confirm(`Sei sicuro di voler eliminare la pagina "${page.title}"?`)) {
+      try {
+        const response = await wikiService.deletePage(page.id);
+        if (response.success) {
+          // Refresh the data
+          loadInitialData();
+        }
+      } catch (err) {
+        console.error('Delete error:', err);
+      }
+    }
+  };
 
   if (loading) {
     return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>
-        <div>Caricamento...</div>
-      </div>
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+          <CircularProgress size={60} />
+        </Box>
+      </Container>
     );
   }
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '30px' }}>
-        <h1>📚 Wiki Aziendale</h1>
-        <p>Base di conoscenza e documentazione del team</p>
-      </div>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      {/* Breadcrumbs */}
+      <Breadcrumbs sx={{ mb: 2 }}>
+        <Link underline="hover" color="inherit" href="/">
+          <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+          Dashboard
+        </Link>
+        <Typography color="text.primary" sx={{ display: 'flex', alignItems: 'center' }}>
+          <WikiIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+          Wiki
+        </Typography>
+      </Breadcrumbs>
 
-      {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
-        <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#007bff' }}>{stats?.totalPages}</div>
-          <div style={{ color: '#666', fontSize: '14px' }}>Pagine totali</div>
-        </div>
-        <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#28a745' }}>{stats?.totalCategories}</div>
-          <div style={{ color: '#666', fontSize: '14px' }}>Categorie</div>
-        </div>
-        <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#ffc107' }}>{stats?.recentUpdates}</div>
-          <div style={{ color: '#666', fontSize: '14px' }}>Aggiornamenti recenti</div>
-        </div>
-      </div>
+      {/* Header */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+          <WikiIcon sx={{ mr: 2, fontSize: 40 }} />
+          Intelligence Wiki
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Gestisci la conoscenza aziendale attraverso documenti intelligenti e ricerca semantica
+        </Typography>
+      </Box>
 
-      {/* Navigation Tabs */}
-      <div style={{ borderBottom: '1px solid #dee2e6', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', gap: '20px' }}>
-          <button
-            onClick={() => setCurrentTab(0)}
-            style={{
-              padding: '10px 15px',
-              border: 'none',
-              background: currentTab === 0 ? '#007bff' : 'transparent',
-              color: currentTab === 0 ? 'white' : '#666',
-              borderRadius: '4px 4px 0 0',
-              cursor: 'pointer'
-            }}
+      {/* Stats Cards */}
+      {stats && (
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Typography color="textSecondary" gutterBottom variant="overline">
+                  Pagine Totali
+                </Typography>
+                <Typography variant="h4" component="div">
+                  {stats.total_pages}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Typography color="textSecondary" gutterBottom variant="overline">
+                  Pagine Pubblicate
+                </Typography>
+                <Typography variant="h4" component="div" color="success.main">
+                  {stats.published_pages}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Typography color="textSecondary" gutterBottom variant="overline">
+                  Categorie
+                </Typography>
+                <Typography variant="h4" component="div">
+                  {stats.total_categories}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Typography color="textSecondary" gutterBottom variant="overline">
+                  Visualizzazioni
+                </Typography>
+                <Typography variant="h4" component="div">
+                  {stats.total_views}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      )}
+
+      {/* Error Display */}
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
+
+      {/* Main Content */}
+      <Paper sx={{ width: '100%' }}>
+        {/* Tabs */}
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs 
+            value={currentTab} 
+            onChange={handleTabChange} 
+            aria-label="wiki tabs"
+            variant="scrollable"
+            scrollButtons="auto"
           >
-            📄 Pagine
-          </button>
-          <button
-            onClick={() => setCurrentTab(1)}
-            style={{
-              padding: '10px 15px',
-              border: 'none',
-              background: currentTab === 1 ? '#007bff' : 'transparent',
-              color: currentTab === 1 ? 'white' : '#666',
-              borderRadius: '4px 4px 0 0',
-              cursor: 'pointer'
-            }}
-          >
-            📂 Categorie
-          </button>
-          <button
-            onClick={() => setCurrentTab(2)}
-            style={{
-              padding: '10px 15px',
-              border: 'none',
-              background: currentTab === 2 ? '#007bff' : 'transparent',
-              color: currentTab === 2 ? 'white' : '#666',
-              borderRadius: '4px 4px 0 0',
-              cursor: 'pointer'
-            }}
-          >
-            🔍 Ricerca
-          </button>
-        </div>
-      </div>
+            <Tab 
+              icon={<UploadIcon />} 
+              label="Carica Documento" 
+              id="wiki-tab-0"
+              aria-controls="wiki-tabpanel-0"
+            />
+            <Tab 
+              icon={<ListIcon />} 
+              label={`Pagine (${stats?.total_pages || 0})`}
+              id="wiki-tab-1"
+              aria-controls="wiki-tabpanel-1"
+            />
+            <Tab 
+              icon={<StatsIcon />} 
+              label="Statistiche" 
+              id="wiki-tab-2"
+              aria-controls="wiki-tabpanel-2"
+            />
+            <Tab 
+              icon={<ChatIcon />} 
+              label="Chat (Coming Soon)" 
+              id="wiki-tab-3"
+              aria-controls="wiki-tabpanel-3"
+              disabled
+            />
+          </Tabs>
+        </Box>
 
-      {/* Tab Content */}
-      <div>
-        {currentTab === 0 && (
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2>Pagine Wiki</h2>
-              <button style={{ padding: '8px 16px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-                ➕ Nuova Pagina
-              </button>
-            </div>
-            <div style={{ border: '1px solid #dee2e6', borderRadius: '8px', padding: '20px', textAlign: 'center', color: '#666' }}>
-              📄 Lista pagine wiki in sviluppo
-            </div>
-          </div>
-        )}
+        {/* Tab Panels */}
+        <TabPanel value={currentTab} index={0}>
+          <WikiUploader
+            categories={categories}
+            onUploadSuccess={handleUploadSuccess}
+            onUploadError={handleUploadError}
+          />
+        </TabPanel>
 
-        {currentTab === 1 && (
-          <div>
-            <h2>Categorie</h2>
-            <div style={{ display: 'grid', gap: '15px' }}>
-              {categories.map((category) => (
-                <div key={category.id} style={{ border: '1px solid #dee2e6', borderRadius: '8px', padding: '15px' }}>
-                  <h3 style={{ margin: '0 0 5px 0' }}>{category.name}</h3>
-                  <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>{category.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        <TabPanel value={currentTab} index={1}>
+          <WikiPageList
+            categories={categories}
+            onPageSelect={handlePageSelect}
+            onPageEdit={handlePageEdit}
+            onPageDelete={handlePageDelete}
+          />
+        </TabPanel>
 
-        {currentTab === 2 && (
-          <div>
-            <h2>Ricerca</h2>
-            <div style={{ marginBottom: '20px' }}>
-              <input
-                type="text"
-                placeholder="🔍 Cerca nella wiki..."
-                style={{ width: '100%', padding: '12px', border: '1px solid #dee2e6', borderRadius: '4px', fontSize: '16px' }}
-              />
-            </div>
-            <div style={{ border: '1px solid #dee2e6', borderRadius: '8px', padding: '20px', textAlign: 'center', color: '#666' }}>
-              🔍 Funzione di ricerca in sviluppo
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+        <TabPanel value={currentTab} index={2}>
+          <Grid container spacing={3}>
+            {/* Detailed Stats */}
+            <Grid item xs={12} md={6}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Distribuzione Pagine
+                  </Typography>
+                  {stats && (
+                    <Box>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography variant="body2">Pubblicate</Typography>
+                        <Typography variant="body2">{stats.published_pages}</Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography variant="body2">Bozze</Typography>
+                        <Typography variant="body2">{stats.draft_pages}</Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography variant="body2">Totale Visualizzazioni</Typography>
+                        <Typography variant="body2">{stats.total_views}</Typography>
+                      </Box>
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Categories List */}
+            <Grid item xs={12} md={6}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Categorie ({categories.length})
+                  </Typography>
+                  <Box>
+                    {categories.map((category) => (
+                      <Box key={category.id} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography variant="body2">{category.name}</Typography>
+                        <Typography variant="body2">{category.page_count} pagine</Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Quick Actions */}
+            <Grid item xs={12}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Azioni Rapide
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item>
+                      <Button
+                        variant="outlined"
+                        startIcon={<UploadIcon />}
+                        onClick={() => setCurrentTab(0)}
+                      >
+                        Carica Nuovo Documento
+                      </Button>
+                    </Grid>
+                    <Grid item>
+                      <Button
+                        variant="outlined"
+                        startIcon={<ListIcon />}
+                        onClick={() => setCurrentTab(1)}
+                      >
+                        Visualizza Tutte le Pagine
+                      </Button>
+                    </Grid>
+                    <Grid item>
+                      <Button
+                        variant="outlined"
+                        startIcon={<StatsIcon />}
+                        onClick={() => loadInitialData()}
+                      >
+                        Aggiorna Statistiche
+                      </Button>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </TabPanel>
+
+        <TabPanel value={currentTab} index={3}>
+          <Card>
+            <CardContent sx={{ textAlign: 'center', py: 6 }}>
+              <ChatIcon sx={{ fontSize: 64, color: 'grey.400', mb: 2 }} />
+              <Typography variant="h6" color="text.secondary" gutterBottom>
+                Chat Interface
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                La funzionalità di chat con contenuti wiki sarà disponibile presto!
+              </Typography>
+            </CardContent>
+          </Card>
+        </TabPanel>
+      </Paper>
+    </Container>
   );
 };
 

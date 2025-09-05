@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import CompanyEditModal from './CompanyEditModal';
+import CompanyEditModal from './CompanyEditModal';
 import styles from '../../styles/common.module.css';
 
 interface Company {

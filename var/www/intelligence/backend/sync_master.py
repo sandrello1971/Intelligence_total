@@ -45,33 +45,33 @@ def run_companies_sync():
         logger.error(f"❌ Errore sync aziende: {e}")
         return False
 
-def run_contacts_sync():
-    """Sync contatti dal CRM"""
-    try:
-        logger.info("👥 Avvio sync contatti...")
-        
-        from app.integrations.crm_incloud.contacts_sync import sync_contacts_from_crm
-        
-        # Sync con limite di 30 contatti
-        stats = sync_contacts_from_crm(limit=30)
-        
-        if stats.get('errors', 0) > stats.get('contacts_checked', 1) / 2:
-            logger.warning("⚠️ Troppi errori nel sync contatti")
-            return False
-        
-        logger.info(f"✅ Sync contatti completato: {stats.get('contacts_created', 0)} creati, {stats.get('contacts_updated', 0)} aggiornati")
-        return True
-        
-    except Exception as e:
-        logger.error(f"❌ Errore sync contatti: {e}")
-        return False
+#def run_contacts_sync():
+#    """Sync contatti dal CRM"""
+#    try:
+#        logger.info("👥 Avvio sync contatti...")
+#        
+#        from app.integrations.crm_incloud.contacts_sync import sync_contacts_from_crm
+#        
+#        # Sync con limite di 30 contatti
+#        stats = sync_contacts_from_crm(limit=30)
+#        
+#        if stats.get('errors', 0) > stats.get('contacts_checked', 1) / 2:
+#            logger.warning("⚠️ Troppi errori nel sync contatti")
+#            return False
+#        
+#        logger.info(f"✅ Sync contatti completato: {stats.get('contacts_created', 0)} creati, {stats.get('contacts_updated', 0)} aggiornati")
+#        return True
+#        
+#    except Exception as e:
+#        logger.error(f"❌ Errore sync contatti: {e}")
+#        return False
 
 def run_activities_sync():
     """Sync attività Intelligence dal CRM"""
     try:
         logger.info("📋 Avvio sync attività Intelligence...")
         
-        from crm_activities_sync import run_sync
+        import sys; sys.path.append("/var/www/intelligence"); from crm_activities_sync import run_sync
         
         # Sync con limite di 50 attività
         stats = run_sync(limit=50)
@@ -144,7 +144,7 @@ def main():
     start_time = datetime.now()
     
     success_count = 0
-    total_steps = 4
+    total_steps = 3
     
     # STEP 1: Sync aziende
     logger.info("=" * 50)
@@ -155,8 +155,8 @@ def main():
     
     # STEP 2: Sync contatti  
     logger.info("=" * 50)
-    if run_contacts_sync():
-        success_count += 1
+#    if run_contacts_sync():
+#        success_count += 1
     
     time.sleep(3)
     

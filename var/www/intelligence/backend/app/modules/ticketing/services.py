@@ -344,8 +344,8 @@ class TicketingService:
                 tasks = [{"id": str(t.id), "title": t.title, "status": t.status} for t in tasks_result]
                 task_stats = {
                     "total": len(tasks),
-                    "completed": len([t for t in tasks if t["status"] == "chiuso"]),
-                    "pending": len([t for t in tasks if t["status"] != "chiuso"])
+                    "completed": len([t for t in tasks if t["status"] in ["completed", "chiuso"]]),
+                    "pending": len([t for t in tasks if t["status"] not in ["completed", "chiuso"]])
                 }
                 
                 tickets.append({
@@ -409,8 +409,8 @@ class TicketingService:
             tasks = [{"id": str(t.id), "title": t.title, "status": t.status} for t in tasks_result]
             task_stats = {
                 "total": len(tasks),
-                "completed": len([t for t in tasks if t["status"] == "chiuso"]),
-                "pending": len([t for t in tasks if t["status"] != "chiuso"])
+                "completed": len([t for t in tasks if t["status"] in ["completed", "chiuso"]]),
+                "pending": len([t for t in tasks if t["status"] not in ["completed", "chiuso"]])
             }
             
             return {
@@ -547,7 +547,7 @@ class TicketingService:
             # Prima prova con task_id diretto (UUID)
             query = text("""
                 SELECT t.id, t.title, t.description, t.status, t.priorita, t.assigned_to, t.note,
-                       t.milestone_id, t.ticket_id, t.sla_giorni, t.ordine, t.estimated_hours,
+                       t.milestone_id, t.ticket_id, t.sla_hours, t.ordine, t.estimated_hours,
                        t.parent_task_id, t.due_date,
                        tk.ticket_code, tk.title as ticket_title,
                        u.name as owner_name, u.surname as owner_surname,
@@ -569,7 +569,7 @@ class TicketingService:
             if not result and task_id.isdigit():
                 query_by_int = text("""
                     SELECT t.id, t.title, t.description, t.status, t.priorita, t.assigned_to, t.note,
-                           t.milestone_id, t.ticket_id, t.sla_giorni, t.ordine, t.estimated_hours,
+                           t.milestone_id, t.ticket_id, t.sla_hours, t.ordine, t.estimated_hours,
                            t.parent_task_id, t.due_date,
                            tk.ticket_code, tk.title as ticket_title,
                            u.name as owner_name, u.surname as owner_surname,

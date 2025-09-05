@@ -25,40 +25,48 @@ class WorkflowGenerator:
     def __init__(self, database_session: Session):
         self.db = database_session
     
+    def clean_activity_text(self, text: str) -> str:
+        """Rimuove metadati aggiunti automaticamente dal sistema"""
+        if not text:
+            return ""
+        
+        # Rimuovi tutto dopo emoji di sistema (🔄 indica inizio metadati)
+        if "🔄" in text:
+            text = text.split("🔄")[0]
+        
+        # Rimuovi righe con emoji di sistema
+        lines = text.split("\n")
+        clean_lines = []
+        for line in lines:
+            # Salta righe con emoji di task/ticket
+            if any(emoji in line for emoji in ["📋", "🎫", "✅", "❌", "⏰"]):
+                continue
+            clean_lines.append(line)
+        
+        return "\n".join(clean_lines).strip()
+
     def extract_kit_from_description(self, description: str, title: str = "") -> Optional[str]:
         """
         Estrae il kit commerciale dalla descrizione dell'attività
+        DINAMICAMENTE dal database - NO HARDCODING
         """
-        full_text = f"{title} {description}".lower()
+        clean_description = self.clean_activity_text(description)
+        clean_title = self.clean_activity_text(title)
+        full_text = f"{clean_title} {clean_description}".lower()
         
-        kit_patterns = {
-            "Kit Start Office Finance": [
-                "start office finance", "startoffice finance", 
-                "sof", "start office fin"
-            ],
-            "Kit Start Office Digital": [
-                "start office digital", "startoffice digital", 
-                "sod"
-            ],
-            "Kit Start Office Training": [
-                "start office training", "startoffice training", 
-                "sot"
-            ],
-            "Kit Start Office Sustainability": [
-                "start office sustainability", "startoffice sustainability", 
-                "sos"
-            ],
-            "Kit Incarico 24 Mesi": [
-                "incarico 24 mesi", "i24", "24 mesi"
-            ],
-            "Kit Incarico Consulenza Strumenti Economico- Finanziari": [
-                "consulenza strumenti", "ics", "strumenti economico"
-            ]
-        }
+        # Carica TUTTI i kit dal database
+        query = text("SELECT id, nome FROM kit_commerciali WHERE attivo = true")
+        kit_results = self.db.execute(query).fetchall()
         
         logger.info(f"🔍 Analizzando: '{full_text[:100]}'")
         
-        for kit_name, patterns in kit_patterns.items():
+        # Per ogni kit, prova pattern automatici
+        for kit_row in kit_results:
+            kit_name = kit_row.nome
+            
+            # Genera pattern automatici dal nome del kit
+            patterns = self.generate_patterns_from_kit_name(kit_name)
+            
             for pattern in patterns:
                 if pattern in full_text:
                     logger.info(f"🎯 Kit identificato: {kit_name} via pattern '{pattern}'")
@@ -66,6 +74,54 @@ class WorkflowGenerator:
         
         logger.warning(f"⚠️ Nessun kit identificato da: '{full_text[:100]}'")
         return None
+
+    def generate_patterns_from_kit_name(self, kit_name: str) -> List[str]:
+        """Genera pattern automatici dal nome del kit"""
+        patterns = []
+        name_lower = kit_name.lower()
+        
+        # Pattern base - nome completo
+        patterns.append(name_lower)
+        
+        # Rimuovi "kit" se presente
+        if "kit" in name_lower:
+            without_kit = name_lower.replace("kit", "").strip()
+            patterns.append(without_kit)
+        
+        # Pattern senza spazi
+        patterns.append(name_lower.replace(" ", ""))
+        
+        # Pattern specifici per StartOffice
+        if "startoffice" in name_lower:
+            # "Kit StartOffice Finance" -> "startoffice finance"
+            base_part = name_lower.replace("kit", "").strip()
+            patterns.append(base_part)
+            
+            # "Kit StartOffice Finance" -> "start office finance" 
+            spaced_version = base_part.replace("startoffice", "start office")
+            patterns.append(spaced_version)
+            
+            # Acronimi - prendi prime lettere dopo "startoffice"
+            words = base_part.split()
+            if len(words) >= 2 and words[0] == "startoffice":
+                # "startoffice finance" -> "sof"
+                acronym = "so" + "".join([w[0] for w in words[1:]])
+                patterns.append(acronym)
+        
+        # Pattern per incarico
+        if "incarico" in name_lower:
+            if "24 mesi" in name_lower:
+                patterns.extend(["i24", "24 mesi", "incarico 24"])
+            patterns.append("incarico")
+        
+        # Rimuovi duplicati mantenendo ordine
+        unique_patterns = []
+        for p in patterns:
+            if p and p not in unique_patterns:
+                unique_patterns.append(p)
+        
+        return unique_patterns
+
     
     def find_kit_details(self, kit_name: str) -> Optional[Dict]:
         query = text("""
@@ -262,21 +318,21 @@ class WorkflowGenerator:
             
             insert_query = text("""
                 INSERT INTO milestones (
-                    id, title, descrizione, stato, 
+                    id, nome, descrizione, stato, 
                     data_inizio, data_fine_prevista,
-                    workflow_milestone_id, sla_hours, 
+                    sla_hours, 
                     warning_days, escalation_days, auto_generate_tickets
                 ) VALUES (
-                    :id, :title, :descrizione, :stato,
+                    :id, :nome, :descrizione, :stato,
                     :data_inizio, :data_fine_prevista, 
-                    :workflow_milestone_id, :sla_hours,
+                    :sla_hours,
                     :warning_days, :escalation_days, :auto_generate_tickets
                 ) RETURNING id
             """)
             
             self.db.execute(insert_query, {
                 "id": milestone_id,
-                "title": milestone_template['nome'],
+                "nome": milestone_template['nome'],
                 "descrizione": milestone_template.get('descrizione', ''),
                 "stato": "pianificata",
                 "data_inizio": datetime.utcnow(),
@@ -325,12 +381,12 @@ class WorkflowGenerator:
                         id, title, description, status, 
                         ticket_id, milestone_id, assigned_to,
                         created_at, due_date, estimated_hours, 
-                        ordine, priorita, task_template_id
+                        ordine, priorita, modello_task_id
                     ) VALUES (
                         :id, :title, :description, :status,
                         CAST(:ticket_id AS uuid), CAST(:milestone_id AS uuid), CAST(:assigned_to AS uuid),
                         :created_at, :due_date, :estimated_hours,
-                        :ordine, :priorita, :task_template_id
+                        :ordine, :priorita, :modello_task_id
                     ) RETURNING id
                 """)
                 
@@ -347,7 +403,7 @@ class WorkflowGenerator:
                     "estimated_hours": task_template.get('durata_stimata_ore', 8),
                     "ordine": task_template.get('ordine', 0),
                     "priorita": "normale",
-                    "task_template_id": task_template['id']
+                    "modello_task_id": str(task_template['id'])
                 })
                 
                 created_tasks.append(task_id)

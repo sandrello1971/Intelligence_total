@@ -1,1 +1,9 @@
-backend/.env
+node_modules/
+venv/
+.venv/
+data/
+logs/
+*.log
+*.sqlite
+.env
+__pycache__/
