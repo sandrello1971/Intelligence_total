@@ -100,8 +100,8 @@ const CommercialTickets: React.FC = () => {
           />
           <Tab 
             icon={<TreeIcon />} 
-            label="TIcket Operativi" 
-            {...a11yProps(0)}
+            label="Ticket Operativi" 
+            {...a11yProps(1)}
             sx={{ 
               minHeight: 72,
               '& .MuiTab-iconWrapper': { 
